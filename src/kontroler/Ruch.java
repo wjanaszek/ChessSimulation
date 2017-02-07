@@ -25,6 +25,5 @@ public class Ruch {
 	
 	public RodzajFigury getFigure(){
 		return figura;
-		//
 	}
 }

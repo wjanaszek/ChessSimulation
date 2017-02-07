@@ -65,7 +65,6 @@ public class Kontroler {
 	
 	private boolean bialeWykonajRuch(boolean zbityKrol){
 		Random r = new Random();
-		//
 		int index;
 		Ruch doWykonania;
 		ArrayList<Ruch> listaRuchow = new ArrayList<Ruch>();

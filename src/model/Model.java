@@ -22,7 +22,6 @@ public class Model {
 		dodajWieze();
 		dodajHetmanow();
 		dodajKrolow();
-		//
 	}
 	
 	private void dodajPionki(){
