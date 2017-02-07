@@ -9,6 +9,7 @@ public class Szachy {
 		Widok widok = new Widok(model);
 		Kontroler ktr = new Kontroler(model, widok);
 		ktr.start();
+		
 	}
 
 }

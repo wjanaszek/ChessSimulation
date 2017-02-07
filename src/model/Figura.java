@@ -25,6 +25,7 @@ public class Figura {
 	
 	public void setPunkt(Punkt punkt){
 		this.punkt = punkt;
+
 	}
 	
 }
