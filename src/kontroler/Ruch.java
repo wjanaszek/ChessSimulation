@@ -3,6 +3,10 @@ package kontroler;
 import model.Punkt;
 import model.RodzajFigury;
 
+/*
+ * Klasa reprezentujaca ruch - zawiera punkt poczatkowy, punkt docelowy, oraz czy nastapiloby (gdyby ruch ten zostal wybrany) zbicie krola
+ * konczace rozgrywke
+ */
 public class Ruch {
 	private Punkt poczatkowy;
 	private Punkt docelowy;

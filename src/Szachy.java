@@ -2,6 +2,9 @@ import kontroler.Kontroler;
 import model.Model;
 import widok.Widok;
 
+/*
+ * Punkt wejsciowy programu
+ */
 public class Szachy {
 
 	public static void main(String[] args) {

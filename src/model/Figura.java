@@ -1,5 +1,8 @@
 package model;
 
+/*
+ * Klasa reprezentujaca model - figure (pojedyncza bierke)
+ */
 public class Figura {
 	private RodzajFigury nazwa;
 	private KolorFigury kolor;

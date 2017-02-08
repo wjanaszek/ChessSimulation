@@ -2,11 +2,17 @@ package model;
 
 import java.util.ArrayList;
 
+/*
+ * Klasa przechowujaca dane o rozgrywce - jej model
+ */
 public class Model {
-	private char[][] plansza;
-	private ArrayList<Figura> figuryBiale;
-	private ArrayList<Figura> figuryCzarne;
+	private char[][] plansza;		// tablica reprezentujaca cala plansze
+	private ArrayList<Figura> figuryBiale;	// lista przechowujaca bierki biale
+	private ArrayList<Figura> figuryCzarne;	// lista przechowujaca bierki czarne
 	
+	/*
+	 * Inicjalizacja modelu - utworzenie tablicy reprezentujacej plansze, oraz odpowiednich figur obu graczy
+	 */
 	public Model(){
 		plansza = new char[8][8];
 		for(int i = 0; i < 8; i++){
@@ -24,6 +30,9 @@ public class Model {
 		dodajKrolow();
 	}
 	
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej pionkow
+	 */
 	private void dodajPionki(){
 		for(int i = 0; i < 8; i++){
 			plansza[1][i] = 'P';
@@ -47,6 +56,9 @@ public class Model {
 		return figuryCzarne;
 	}
 
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej skoczkow
+	 */
 	private void dodajSkoczki(){
 		/* dodaj biale: */
 		plansza[0][1] = 'S';
@@ -61,6 +73,9 @@ public class Model {
 		figuryCzarne.add(new Figura(new Punkt(6, 7),  RodzajFigury.SKOCZEK, KolorFigury.CZARNY));
 	}
 	
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej goncow
+	 */
 	private void dodajGonce(){
 		/* dodaj biale: */
 		plansza[0][2] = 'G';
@@ -75,6 +90,9 @@ public class Model {
 		figuryCzarne.add(new Figura(new Punkt(5, 7), RodzajFigury.GONIEC, KolorFigury.CZARNY));
 	}
 	
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej wiez
+	 */
 	private void dodajWieze(){
 		/* dodaj biale: */
 		plansza[0][0] = 'W';
@@ -89,6 +107,9 @@ public class Model {
 		figuryCzarne.add(new Figura(new Punkt(7, 7), RodzajFigury.WIEZA, KolorFigury.CZARNY));
 	}
 	
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej hetmanow
+	 */
 	private void dodajHetmanow(){
 		/* dodaj biale: */
 		plansza[0][3] = 'H';
@@ -99,6 +120,9 @@ public class Model {
 		figuryCzarne.add(new Figura(new Punkt(3, 7), RodzajFigury.HETMAN, KolorFigury.CZARNY));
 	}
 	
+	/*
+	 * Pomocnicza metoda do inicjalizacji modelu - dodanie do niej krolow
+	 */
 	private void dodajKrolow(){
 		/* dodaj biale: */
 		plansza[0][4] = 'K';

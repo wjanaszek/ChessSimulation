@@ -1,5 +1,8 @@
 package model;
 
+/*
+ * Klasa reprezentujaca punkt o 2 wspolrzednych x i y
+ */
 public class Punkt {
 	private int x;
 	private int y;

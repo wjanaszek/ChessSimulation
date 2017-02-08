@@ -2,6 +2,9 @@ package widok;
 
 import model.Model;
 
+/*
+ * Klasa odpowiedzialna za wypisywanie komunikatow, planszy na ekran
+ */
 public class Widok {
 	private Model model;
 	private char[][] plansza;
@@ -10,6 +13,9 @@ public class Widok {
 		this.model = model;
 	}
 	
+	/*
+	 * Rysuje plansze na ekrania - biale bierki u gory, czarne na dole
+	 */
 	public void rysujPlansze(){
 		plansza = model.getPlansza();
 		int tmp;
