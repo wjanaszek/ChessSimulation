@@ -117,7 +117,7 @@ public class Kontroler {
 	private boolean bialeWykonajRuch(boolean zbityKrol, boolean drapiezny){
 		Random r = new Random();
 		int index;
-		Ruch doWykonania;
+		Ruch doWykonania = null;
 		ArrayList<Ruch> listaRuchow = new ArrayList<Ruch>();
 		for(int i = 0; i < model.getFiguryBiale().size(); i++){
 			switch(model.getFiguryBiale().get(i).getNazwa()){
@@ -144,23 +144,117 @@ public class Kontroler {
 		if(listaRuchow.isEmpty()){		// oznacza to, że nie było żadnego ruchu do wykonania
 			return false;
 		}
-		// wylosuj indeks (ruch):
-		index = r.nextInt(listaRuchow.size());
-		doWykonania = listaRuchow.get(index);	// wybierz element (ruch) znajdujacy sie pod tym indeksem
-		
-		zbityKrol = doWykonania.zbityKrol;
-		int zrX, zrY, docX, docY, tmpY1, tmpY2;
+		int zrX = 0, zrY = 0, docX = 0, docY = 0, tmpY1 = 0, tmpY2 = 0;
 		int zbityX, zbityY;
 		char tmp;
-		zrX = doWykonania.getPoczatkowy().getX();
-		zrY = doWykonania.getPoczatkowy().getY();
-		docX = doWykonania.getDocelowy().getX();
-		docY = doWykonania.getDocelowy().getY();
-		
+		if (!drapiezny) {
+			// wylosuj indeks (ruch):
+			index = r.nextInt(listaRuchow.size());
+			doWykonania = listaRuchow.get(index); // wybierz element (ruch) znajdujacy sie pod tym indeksem
+			zbityKrol = doWykonania.zbityKrol;
+			zrX = doWykonania.getPoczatkowy().getX();
+			zrY = doWykonania.getPoczatkowy().getY();
+			docX = doWykonania.getDocelowy().getX();
+			docY = doWykonania.getDocelowy().getY();
+		}
+		else {
+			// lista ruchow z biciem:
+			ArrayList<Ruch> zBiciem = new ArrayList<Ruch>();
+			for(int i = 0; i < listaRuchow.size(); i++){
+				if(listaRuchow.get(i).getZbitaFigura() != null){
+					zBiciem.add(listaRuchow.get(i));
+				}
+			}
+			
+			// jesli nie ma takich ruchow to postap to jak w przypadku niedrapieznego gracza:
+			if(zBiciem.isEmpty()){
+				// wylosuj indeks:
+				index = r.nextInt(listaRuchow.size());
+				doWykonania = listaRuchow.get(index); // wybierz element (ruch) znajdujacy sie pod tym indeksem
+				zbityKrol = doWykonania.zbityKrol;
+				zrX = doWykonania.getPoczatkowy().getX();
+				zrY = doWykonania.getPoczatkowy().getY();
+				docX = doWykonania.getDocelowy().getX();
+				docY = doWykonania.getDocelowy().getY();
+			}
+			// jesli sa takie ruchy, to stworz indeksy dla ruchow zbijajacych odpowiednie figury:
+			else {
+				ArrayList<Integer> indeksyK = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy krola
+				ArrayList<Integer> indeksyH = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy hetmana
+				ArrayList<Integer> indeksyW = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy wieze
+				ArrayList<Integer> indeksyS = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy skoczka
+				ArrayList<Integer> indeksyG = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy gonca
+				ArrayList<Integer> indeksyP = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy piona
+				
+				for(int i = 0; i < zBiciem.size(); i++){
+					if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.KROL){
+						zbityKrol = true;
+						indeksyK.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.HETMAN){
+						indeksyH.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.WIEZA){
+						indeksyW.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.SKOCZEK){
+						indeksyS.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.GONIEC){
+						indeksyG.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.PIONEK){
+						indeksyP.add(i);
+					}
+				}
+				
+				// szukaj ruchow zbijajacych krola, i jesli jest ich kilka to wylosuj jeden z nich:
+				if(indeksyK.size() > 0){
+					index = r.nextInt(indeksyK.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych hetmana, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyH.size() > 0){
+					index = r.nextInt(indeksyH.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych wieze, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyW.size() > 0){
+					index = r.nextInt(indeksyW.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych skoczka, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyS.size() > 0){
+					index = r.nextInt(indeksyS.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych gonca, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyG.size() > 0){
+					index = r.nextInt(indeksyG.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych piona, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyP.size() > 0){
+					index = r.nextInt(indeksyP.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// nie bylo zadnych ruchow
+				else {
+					index = r.nextInt(listaRuchow.size());
+					doWykonania = listaRuchow.get(index);
+					zbityKrol = doWykonania.zbityKrol;
+				}
+				zrX = doWykonania.getPoczatkowy().getX();
+				zrY = doWykonania.getPoczatkowy().getY();
+				docX = doWykonania.getDocelowy().getX();
+				docY = doWykonania.getDocelowy().getY();
+			}
+		}
 		// znajdz wlasciwa figure w liscie figur danego gracza i zmien wartosci na planszy:
 		for(int i = 0; i < model.getFiguryBiale().size(); i++){
 			if(model.getFiguryBiale().get(i).getPunkt().getX() == zrX && 
 					model.getFiguryBiale().get(i).getPunkt().getY() == zrY){
+				// ustaw nowe wspolrzedne figury:
 				model.getFiguryBiale().get(i).getPunkt().setX(docX);
 				model.getFiguryBiale().get(i).getPunkt().setY(docY);
 				model.getPlansza()[zrY][zrX] = '.';
@@ -222,19 +316,112 @@ public class Kontroler {
 		if(listaRuchow.isEmpty()){
 			return false;
 		}
-		// losowanie ruchu:
-		index = r.nextInt(listaRuchow.size());
-		doWykonania = listaRuchow.get(index);
-		
-		zbityKrol = doWykonania.zbityKrol;
-		int zrX, zrY, docX, docY, tmpY1, tmpY2;
+		int zrX = 0, zrY = 0, docX = 0, docY = 0, tmpY1 = 0, tmpY2 = 0;
 		int zbityX, zbityY;
 		char tmp;
-		zrX = doWykonania.getPoczatkowy().getX();
-		zrY = doWykonania.getPoczatkowy().getY();
-		docX = doWykonania.getDocelowy().getX();
-		docY = doWykonania.getDocelowy().getY();
-		
+		if (!drapiezny) {
+			// wylosuj indeks (ruch):
+			index = r.nextInt(listaRuchow.size());
+			doWykonania = listaRuchow.get(index); // wybierz element (ruch) znajdujacy sie pod tym indeksem
+			zbityKrol = doWykonania.zbityKrol;
+			zrX = doWykonania.getPoczatkowy().getX();
+			zrY = doWykonania.getPoczatkowy().getY();
+			docX = doWykonania.getDocelowy().getX();
+			docY = doWykonania.getDocelowy().getY();
+		}
+		else {
+			// lista ruchow z biciem:
+			ArrayList<Ruch> zBiciem = new ArrayList<Ruch>();
+			for(int i = 0; i < listaRuchow.size(); i++){
+				if(listaRuchow.get(i).getZbitaFigura() != null){
+					zBiciem.add(listaRuchow.get(i));
+				}
+			}
+			
+			// jesli nie ma takich ruchow to postap to jak w przypadku niedrapieznego gracza:
+			if(zBiciem.isEmpty()){
+				// wylosuj indeks:
+				index = r.nextInt(listaRuchow.size());
+				doWykonania = listaRuchow.get(index); // wybierz element (ruch) znajdujacy sie pod tym indeksem
+				zbityKrol = doWykonania.zbityKrol;
+				zrX = doWykonania.getPoczatkowy().getX();
+				zrY = doWykonania.getPoczatkowy().getY();
+				docX = doWykonania.getDocelowy().getX();
+				docY = doWykonania.getDocelowy().getY();
+			}
+			// jesli sa takie ruchy, to stworz indeksy dla ruchow zbijajacych odpowiednie figury:
+			else {
+				ArrayList<Integer> indeksyK = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy krola
+				ArrayList<Integer> indeksyH = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy hetmana
+				ArrayList<Integer> indeksyW = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy wieze
+				ArrayList<Integer> indeksyS = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy skoczka
+				ArrayList<Integer> indeksyG = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy gonca
+				ArrayList<Integer> indeksyP = new ArrayList<Integer>();	// indeksy z listy zBiciem, pod ktorymi znajduje sie ruch zbijajacy piona
+				
+				for(int i = 0; i < zBiciem.size(); i++){
+					if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.KROL){
+						zbityKrol = true;
+						indeksyK.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.HETMAN){
+						indeksyH.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.WIEZA){
+						indeksyW.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.SKOCZEK){
+						indeksyS.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.GONIEC){
+						indeksyG.add(i);
+					}
+					else if(zBiciem.get(i).getZbitaFigura() == RodzajFigury.PIONEK){
+						indeksyP.add(i);
+					}
+				}
+				
+				// szukaj ruchow zbijajacych krola, i jesli jest ich kilka to wylosuj jeden z nich:
+				if(indeksyK.size() > 0){
+					index = r.nextInt(indeksyK.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych hetmana, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyH.size() > 0){
+					index = r.nextInt(indeksyH.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych wieze, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyW.size() > 0){
+					index = r.nextInt(indeksyW.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych skoczka, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyS.size() > 0){
+					index = r.nextInt(indeksyS.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych gonca, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyG.size() > 0){
+					index = r.nextInt(indeksyG.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// szukaj ruchow zbijajacych piona, i jesli jest ich kilka to wylosuj jeden z nich:
+				else if(indeksyP.size() > 0){
+					index = r.nextInt(indeksyP.size());
+					doWykonania = zBiciem.get(index);
+				}
+				// nie bylo zadnych ruchow
+				else {
+					index = r.nextInt(listaRuchow.size());
+					doWykonania = listaRuchow.get(index);
+					zbityKrol = doWykonania.zbityKrol;
+				}
+				zrX = doWykonania.getPoczatkowy().getX();
+				zrY = doWykonania.getPoczatkowy().getY();
+				docX = doWykonania.getDocelowy().getX();
+				docY = doWykonania.getDocelowy().getY();
+			}
+		}
 		for(int i = 0; i < model.getFiguryCzarne().size(); i++){
 			if(model.getFiguryCzarne().get(i).getPunkt().getX() == zrX && 
 					model.getFiguryCzarne().get(i).getPunkt().getY() == zrY){
@@ -1252,8 +1439,8 @@ public class Kontroler {
 		else if(model.getPlansza()[y][x] == 'g' || model.getPlansza()[y][x] == 'G'){
 			return RodzajFigury.GONIEC;
 		}
-		else {	// nigdy nie nastapi
-			return RodzajFigury.PIONEK;
+		else {
+			return null;
 		}
 	}
 	
@@ -1302,6 +1489,12 @@ public class Kontroler {
 			return 'H';
 		}
 		else return '-';
+	}
+	
+	private void wyswietlKomunikatORuchu(int tmp, int zrX, int tmpY1, int docX, int tmpY2){
+		System.out.println();
+		System.out.println("Ruch " + tmp + " z " + getCharFromInt(zrX) + tmpY1 + " na " + getCharFromInt(docX) + tmpY2);
+		System.out.println();
 	}
 	
 	/*
