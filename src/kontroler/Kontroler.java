@@ -10,6 +10,9 @@ import model.Punkt;
 import model.RodzajFigury;
 import widok.Widok;
 
+/*
+ * Klasa sterujaca przebiegiem gry 
+ */
 public class Kontroler {
 	private Model model;
 	private Widok widok;
@@ -19,6 +22,11 @@ public class Kontroler {
 		this.widok = widok;
 	}
 	
+	/*
+	 * Glowna petla programu. Steruje gra dwoch graczy. Najpierw ruch wykonuja biale (jesli nie maja zadnego ruchu do wykonania, to petla jest przerywana
+	 * i program konczy prace). Potem ruch wykonuja czarne (i tak samo - jesli nie maja zadnego ruchu do wykonania, to program konczy prace). Wewnatrz metod wykonujacych
+	 * ruch bialych lub czarnych bierek sprawdzane jest, czy nie zostal zbity krol przeciwnika, aby rowniez wtedy zakonczyc gre.
+	 */
 	public void start(){
 		int liczbaRuchow = 0;
 		int tmp;
@@ -42,11 +50,6 @@ public class Kontroler {
 			}
 			widok.rysujPlansze();
 			System.out.println();
-			/*if(zbityKrol){
-				System.out.println("! ! ! ! ! ! ! ! ! ! ! !");
-				System.out.println("\t Zbito krola!");
-				break;
-			}*/
 			
 			/* czarne wykonuja ruch: */
 			if(!czarneWykonajRuch(zbityKrol)){
@@ -63,40 +66,44 @@ public class Kontroler {
 		}
 	}
 	
+	/*
+	 * Metoda sluzaca do wykonania ruchu przez biale bierki
+	 * @returns false, gdy nie ma mozliwych ruchow do wykonania, lub zostal zbity krol przeciwnika. True w przeciwnym przypadku
+	 */
 	private boolean bialeWykonajRuch(boolean zbityKrol){
 		Random r = new Random();
 		int index;
 		Ruch doWykonania;
 		ArrayList<Ruch> listaRuchow = new ArrayList<Ruch>();
 		for(int i = 0; i < model.getFiguryBiale().size(); i++){
-			//System.out.println(model.getFiguryBiale().get(i).getPunkt());
 			switch(model.getFiguryBiale().get(i).getNazwa()){
 			case PIONEK:
-				listaRuchow.addAll(getMozliweRuchyPionka(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchyPionka(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));		// scal listy
 				break;
 			case WIEZA:
-				listaRuchow.addAll(getMozliweRuchyWiezy(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchyWiezy(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));		// scal listy
 				break;
 			case SKOCZEK:
-				listaRuchow.addAll(getMozliweRuchySkoczka(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchySkoczka(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));	// scal listy
 				break;
 			case GONIEC:
-				listaRuchow.addAll(getMozliweRuchyGonca(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchyGonca(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));		// scal listy
 				break;
 			case HETMAN:
-				listaRuchow.addAll(getMozliweRuchyHetmana(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchyHetmana(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));	// scal listy
 				break;
 			case KROL:
-				listaRuchow.addAll(getMozliweRuchyKrola(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));
+				listaRuchow.addAll(getMozliweRuchyKrola(model.getFiguryBiale().get(i).getPunkt(), KolorFigury.BIALY));		// scal listy
 				break;
 			}
 		}
-		if(listaRuchow.isEmpty()){
+		if(listaRuchow.isEmpty()){		// oznacza to, że nie było żadnego ruchu do wykonania
 			return false;
 		}
-		//System.out.println(listaRuchow.size());
+		// wylosuj indeks (ruch):
 		index = r.nextInt(listaRuchow.size());
-		doWykonania = listaRuchow.get(index);
+		doWykonania = listaRuchow.get(index);	// wybierz element (ruch) znajdujacy sie pod tym indeksem
+		
 		zbityKrol = doWykonania.zbityKrol;
 		int zrX, zrY, docX, docY, tmpY1, tmpY2;
 		int zbityX, zbityY;
@@ -105,48 +112,32 @@ public class Kontroler {
 		zrY = doWykonania.getPoczatkowy().getY();
 		docX = doWykonania.getDocelowy().getX();
 		docY = doWykonania.getDocelowy().getY();
+		
+		// znajdz wlasciwa figure w liscie figur danego gracza i zmien wartosci na planszy:
 		for(int i = 0; i < model.getFiguryBiale().size(); i++){
 			if(model.getFiguryBiale().get(i).getPunkt().getX() == zrX && 
 					model.getFiguryBiale().get(i).getPunkt().getY() == zrY){
 				model.getFiguryBiale().get(i).getPunkt().setX(docX);
 				model.getFiguryBiale().get(i).getPunkt().setY(docY);
 				model.getPlansza()[zrY][zrX] = '.';
-				/*switch(doWykonania.getFigure()){
-				case PIONEK:
-					model.getPlansza()[docY][docX] = 'P';
-					break;
-				case WIEZA:
-					model.getPlansza()[docY][docX] = 'W';
-					break;
-				case SKOCZEK:
-					model.getPlansza()[docY][docX] = 'S';
-					break;
-				case GONIEC:
-					model.getPlansza()[docY][docX] = 'G';
-					break;
-				case HETMAN:
-					model.getPlansza()[docY][docX] = 'H';
-					break;
-				case KROL:
-					model.getPlansza()[docY][docX] = 'K';
-					break;
-				}*/
 				tmp = getCharFromRodzajFiguryAndKolorFigury(doWykonania.getFigure(), KolorFigury.BIALY);
 				tmpY1 = zrY + 1;
 				tmpY2= docY + 1;
-				if(model.getPlansza()[docY][docX] != '.'){
+				if(model.getPlansza()[docY][docX] != '.'){		// jesli zostanie zbita figura przeciwnika
 					zbityX = docX;
 					zbityY = docY;
 					usunZbitaFigureZListy(model.getFiguryCzarne(), zbityX, zbityY);
 				}
 				model.getPlansza()[docY][docX] = tmp;
+				
+				// wyswietl komunikat o ruchu:
 				System.out.println();
 				System.out.println("Ruch " + tmp + " z " + getCharFromInt(zrX) + tmpY1 + " na " + getCharFromInt(docX) + tmpY2);
 				System.out.println();
 				break;
 			}
 		}
-		if(zbityKrol){
+		if(zbityKrol){		// krol zostal zbity, nalezy przerwac rozrywke
 			System.out.println();
 			System.out.println("Biale zbily krola!");
 			return false;
@@ -154,6 +145,9 @@ public class Kontroler {
 		return true;
 	}
 	
+	/*
+	 * Analogiczna metoda jak dla bialych bierek - sluzy do wykonania ruchu przez czarne bierki
+	 */
 	private boolean czarneWykonajRuch(boolean zbityKrol){
 		Random r = new Random();
 		int index;
@@ -162,31 +156,32 @@ public class Kontroler {
 		for(int i = 0; i < model.getFiguryCzarne().size(); i++){
 			switch(model.getFiguryCzarne().get(i).getNazwa()){
 			case PIONEK:
-				listaRuchow.addAll(getMozliweRuchyPionka(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchyPionka(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			case WIEZA:
-				listaRuchow.addAll(getMozliweRuchyWiezy(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchyWiezy(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			case SKOCZEK:
-				listaRuchow.addAll(getMozliweRuchySkoczka(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchySkoczka(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			case GONIEC:
-				listaRuchow.addAll(getMozliweRuchyGonca(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchyGonca(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			case HETMAN:
-				listaRuchow.addAll(getMozliweRuchyHetmana(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchyHetmana(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			case KROL:
-				listaRuchow.addAll(getMozliweRuchyKrola(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));
+				listaRuchow.addAll(getMozliweRuchyKrola(model.getFiguryCzarne().get(i).getPunkt(), KolorFigury.CZARNY));	// scal listy
 				break;
 			}
 		}
 		if(listaRuchow.isEmpty()){
 			return false;
 		}
-		//System.out.println(listaRuchow.size());
+		// losowanie ruchu:
 		index = r.nextInt(listaRuchow.size());
 		doWykonania = listaRuchow.get(index);
+		
 		zbityKrol = doWykonania.zbityKrol;
 		int zrX, zrY, docX, docY, tmpY1, tmpY2;
 		int zbityX, zbityY;
@@ -195,6 +190,7 @@ public class Kontroler {
 		zrY = doWykonania.getPoczatkowy().getY();
 		docX = doWykonania.getDocelowy().getX();
 		docY = doWykonania.getDocelowy().getY();
+		
 		for(int i = 0; i < model.getFiguryCzarne().size(); i++){
 			if(model.getFiguryCzarne().get(i).getPunkt().getX() == zrX && 
 					model.getFiguryCzarne().get(i).getPunkt().getY() == zrY){
@@ -210,13 +206,14 @@ public class Kontroler {
 				model.getPlansza()[docY][docX] = tmp;
 				tmpY1 = zrY + 1;
 				tmpY2 = docY + 1;
+				// wyswietlenie komunikatu:
 				System.out.println();
 				System.out.println("Ruch " + tmp + " z " + getCharFromInt(zrX) + tmpY1 + " na " + getCharFromInt(docX) + tmpY2);
 				System.out.println();
 				break;
 			}
 		}
-		if(zbityKrol){
+		if(zbityKrol){		// zostal zbity krol przeciwnika, nalezy przerwac rozgrywke
 			System.out.println();
 			System.out.println("Czarne zbily krola!");
 			return false;
@@ -224,6 +221,9 @@ public class Kontroler {
 		return true;
 	}
 	
+	/*
+	 * Metoda zwracajaca mozliwe ruchy pionka z pozycji okreslonej przez poczatkowyPunkt.
+	 */
 	private ArrayList<Ruch> getMozliweRuchyPionka(Punkt poczatkowyPunkt, KolorFigury kolor){
 		ArrayList<Ruch> res = new ArrayList<Ruch>();
 		Ruch tmp;
@@ -234,7 +234,8 @@ public class Kontroler {
 			if (y + 1 != 8 && model.getPlansza()[y + 1][x] == '.') {
 				res.add(new Ruch(poczatkowyPunkt, new Punkt(x, y + 1), RodzajFigury.PIONEK));
 			}
-			if (y + 1 != 8 && x + 1 != 8 && model.getPlansza()[y + 1][x + 1] != '.' && model.getPlansza()[y + 1][x + 1] != 'W' 
+			if (y + 1 != 8 && x + 1 != 8 && model.getPlansza()[y + 1][x + 1] != '.' 
+					&& model.getPlansza()[y + 1][x + 1] != 'W' 
 					&& model.getPlansza()[y + 1][x + 1] != 'S' 
 					&& model.getPlansza()[y + 1][x + 1] != 'H' 
 					&& model.getPlansza()[y + 1][x + 1] != 'K' 
@@ -246,7 +247,8 @@ public class Kontroler {
 				}
 				res.add(tmp);
 			} 
-			if (y + 1 != 8 && x - 1 != -1 && model.getPlansza()[y + 1][x - 1] != '.' && model.getPlansza()[y + 1][x - 1] != 'W' 
+			if (y + 1 != 8 && x - 1 != -1 && model.getPlansza()[y + 1][x - 1] != '.' 
+					&& model.getPlansza()[y + 1][x - 1] != 'W' 
 					&& model.getPlansza()[y + 1][x - 1] != 'S'
 					&& model.getPlansza()[y + 1][x - 1] != 'H' 
 					&& model.getPlansza()[y + 1][x - 1] != 'K' 
@@ -263,7 +265,8 @@ public class Kontroler {
 			if (y - 1 != -1 && model.getPlansza()[y - 1][x] == '.') {
 				res.add(new Ruch(poczatkowyPunkt, new Punkt(x, y - 1), RodzajFigury.PIONEK));
 			}
-			if (y - 1 != -1 && x + 1 != 8 && model.getPlansza()[y - 1][x + 1] != '.' && model.getPlansza()[y - 1][x + 1] != 'p'
+			if (y - 1 != -1 && x + 1 != 8 && model.getPlansza()[y - 1][x + 1] != '.' 
+					&& model.getPlansza()[y - 1][x + 1] != 'p'
 					&& model.getPlansza()[y - 1][x + 1] != 's'
 					&& model.getPlansza()[y - 1][x + 1] != 'h'
 					&& model.getPlansza()[y - 1][x + 1] != 'k'
@@ -275,7 +278,8 @@ public class Kontroler {
 				}
 				res.add(tmp);
 			} 
-			if (y - 1 != -1 && x - 1 != -1 && model.getPlansza()[y - 1][x - 1] != '.' && model.getPlansza()[y - 1][x - 1] != 'p'
+			if (y - 1 != -1 && x - 1 != -1 && model.getPlansza()[y - 1][x - 1] != '.' 
+					&& model.getPlansza()[y - 1][x - 1] != 'p'
 					&& model.getPlansza()[y - 1][x - 1] != 's'
 					&& model.getPlansza()[y - 1][x - 1] != 'h'
 					&& model.getPlansza()[y - 1][x - 1] != 'k'
@@ -291,6 +295,9 @@ public class Kontroler {
 		return res;
 	}
 	
+	/*
+	 * Metoda zwracajaca mozliwe ruchy wiezy z pozycji okreslonej przez poczatkowyPunkt.
+	 */
 	private ArrayList<Ruch> getMozliweRuchyWiezy(Punkt poczatkowyPunkt, KolorFigury kolor){
 		ArrayList<Ruch> res = new ArrayList<Ruch>();
 		Ruch tmp;
@@ -298,238 +305,33 @@ public class Kontroler {
 		final int y = poczatkowyPunkt.getY();
 		switch(kolor){
 		case BIALY:
-			ArrayList<Punkt> wspBiale = getMozliwePunktyProsto(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> wspBiale = getMozliwePunktyProsto(poczatkowyPunkt, kolor);		// znajdz punkty, do ktorych moze sie przemiescic wieza
 			for(int i = 0; i < wspBiale.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, wspBiale.get(i), RodzajFigury.WIEZA);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);		// dodaj je do listy ruchow
 			}
 			break;
 		case CZARNY:
-			ArrayList<Punkt> wspCzarne = getMozliwePunktyProsto(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> wspCzarne = getMozliwePunktyProsto(poczatkowyPunkt, kolor);	// znajdz punkty, do ktorych moze sie przemiescic wieza
 			for(int i = 0; i < wspCzarne.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, wspCzarne.get(i), RodzajFigury.WIEZA);
-				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
+				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);		// dodaj je do listy ruchow
 			}
 			break;
 		}
-		/*boolean moznaDodawacPlusX = true;
-		boolean moznaDodawacMinusX = true;
-		boolean moznaDodawacPlusY = true;
-		boolean moznaDodawacMinusY = true;
-		switch(kolor){
-		case BIALY:
-			//sprawdz X:
-			for(int i = 1; i < 8; i++){
-				if(x + i < 8 && (model.getPlansza()[y][x + i] == '.'
-						|| model.getPlansza()[y][x + i] == 's'
-						|| model.getPlansza()[y][x + i] == 'g'
-						|| model.getPlansza()[y][x + i] == 'k'
-						|| model.getPlansza()[y][x + i] == 'h'
-						|| model.getPlansza()[y][x + i] == 'w'
-						|| model.getPlansza()[y][x + i] == 'p')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x + i, y), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y][x + i] == 'k'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacPlusX){
-						res.add(tmp);
-					}
-				}
-				else if (x + i < 8 && (model.getPlansza()[y][x + i] == 'S'
-						|| model.getPlansza()[y][x + i] == 'G'
-						|| model.getPlansza()[y][x + i] == 'K'
-						|| model.getPlansza()[y][x + i] == 'H'
-						|| model.getPlansza()[y][x + i] == 'W'
-						|| model.getPlansza()[y][x + i] == 'P')){
-					moznaDodawacPlusX = false;
-				}
-				if(x - i >= 0 && (model.getPlansza()[y][x - i] == '.'
-						|| model.getPlansza()[y][x - i] == 's'
-						|| model.getPlansza()[y][x - i] == 'g'
-						|| model.getPlansza()[y][x - i] == 'k'
-						|| model.getPlansza()[y][x - i] == 'h'
-						|| model.getPlansza()[y][x - i] == 'w'
-						|| model.getPlansza()[y][x - i] == 'p')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x - i, y), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y][x - i] == 'k'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacMinusX){
-						res.add(tmp);
-					} 
-				}
-				else if(x - i >= 0 && (model.getPlansza()[y][x - i] == 'S'
-						|| model.getPlansza()[y][x - i] == 'G'
-						|| model.getPlansza()[y][x - i] == 'K'
-						|| model.getPlansza()[y][x - i] == 'H'
-						|| model.getPlansza()[y][x - i] == 'W'
-						|| model.getPlansza()[y][x - i] == 'P')) {
-					moznaDodawacMinusX = false;
-				}
-			}
-			//sprawdz Y:
-			for(int i = 0; i < 8; i++){
-				if(y + i < 8 && (model.getPlansza()[y  + i][x] == '.'
-						|| model.getPlansza()[y + i][x] == 's'
-						|| model.getPlansza()[y + i][x] == 'g'
-						|| model.getPlansza()[y + i][x] == 'k'
-						|| model.getPlansza()[y + i][x] == 'h'
-						|| model.getPlansza()[y + i][x] == 'w'
-						|| model.getPlansza()[y + i][x] == 'p')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y + i), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y + i][x] == 'k'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacPlusY){
-						res.add(tmp);
-					}
-				}
-				else if(y + i < 8 && (model.getPlansza()[y + i][x] == 'S'
-						|| model.getPlansza()[y + i][x] == 'G'
-						|| model.getPlansza()[y + i][x] == 'K'
-						|| model.getPlansza()[y + i][x] == 'H'
-						|| model.getPlansza()[y + i][x] == 'W'
-						|| model.getPlansza()[y + i][x] == 'P')){
-					moznaDodawacPlusY = false;
-				}
-				if(y - i >= 0 && (model.getPlansza()[y  - i][x] == '.'
-						|| model.getPlansza()[y - i][x] == 's'
-						|| model.getPlansza()[y - i][x] == 'g'
-						|| model.getPlansza()[y - i][x] == 'k'
-						|| model.getPlansza()[y - i][x] == 'h'
-						|| model.getPlansza()[y - i][x] == 'w'
-						|| model.getPlansza()[y - i][x] == 'p')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y - i), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y - i][x] == 'k'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacMinusY){
-						res.add(tmp);
-					}
-				}
-				else if(y - i >= 0 && (model.getPlansza()[y - i][x] == 'S'
-						|| model.getPlansza()[y - i][x] == 'G'
-						|| model.getPlansza()[y - i][x] == 'K'
-						|| model.getPlansza()[y - i][x] == 'H'
-						|| model.getPlansza()[y - i][x] == 'W'
-						|| model.getPlansza()[y - i][x] == 'P')){
-					moznaDodawacMinusY = false;
-				}
-			}
-			break;
-		case CZARNY:
-			//sprawdz X:
-			for(int i = 1; i < 8; i++){
-				if(x + i < 8 && (model.getPlansza()[y][x + i] == '.'
-						|| model.getPlansza()[y][x + i] == 'S'
-						|| model.getPlansza()[y][x + i] == 'G'
-						|| model.getPlansza()[y][x + i] == 'K'
-						|| model.getPlansza()[y][x + i] == 'H'
-						|| model.getPlansza()[y][x + i] == 'W'
-						|| model.getPlansza()[y][x + i] == 'P')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x + i, y), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y][x + i] == 'K'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacPlusX){
-						res.add(tmp);
-					}
-				}
-				else if(x + i < 8 && (model.getPlansza()[y][x + i] == 's'
-						|| model.getPlansza()[y][x + i] == 'g'
-						|| model.getPlansza()[y][x + i] == 'k'
-						|| model.getPlansza()[y][x + i] == 'h'
-						|| model.getPlansza()[y][x + i] == 'w'
-						|| model.getPlansza()[y][x + i] == 'p')){
-					moznaDodawacPlusX = false;
-				}
-				if(x - i >= 0 && (model.getPlansza()[y][x - i] == '.'
-						|| model.getPlansza()[y][x - i] == 'S'
-						|| model.getPlansza()[y][x - i] == 'G'
-						|| model.getPlansza()[y][x - i] == 'K'
-						|| model.getPlansza()[y][x - i] == 'H'
-						|| model.getPlansza()[y][x - i] == 'W'
-						|| model.getPlansza()[y][x - i] == 'P')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x - i, y), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y][x - i] == 'K'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacMinusX){
-						res.add(tmp);
-					} 
-				}
-				else if(x - i >= 0 && (model.getPlansza()[y][x - i] == 's'
-						|| model.getPlansza()[y][x - i] == 'g'
-						|| model.getPlansza()[y][x - i] == 'k'
-						|| model.getPlansza()[y][x - i] == 'h'
-						|| model.getPlansza()[y][x - i] == 'w'
-						|| model.getPlansza()[y][x - i] == 'p')){
-					moznaDodawacMinusX = false;
-				}
-			}
-			//sprawdz Y:
-			for(int i = 0; i < 8; i++){
-				if(y + i < 8 && (model.getPlansza()[y  + i][x] == '.'
-						|| model.getPlansza()[y + i][x] == 'S'
-						|| model.getPlansza()[y + i][x] == 'G'
-						|| model.getPlansza()[y + i][x] == 'K'
-						|| model.getPlansza()[y + i][x] == 'H'
-						|| model.getPlansza()[y + i][x] == 'W'
-						|| model.getPlansza()[y + i][x] == 'P')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y + i), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y + i][x] == 'K'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacPlusY){
-						res.add(tmp);
-					}
-				}
-				else if(y + i < 8 && (model.getPlansza()[y + i][x] == 's'
-						|| model.getPlansza()[y + i][x] == 'g'
-						|| model.getPlansza()[y + i][x] == 'k'
-						|| model.getPlansza()[y + i][x] == 'h'
-						|| model.getPlansza()[y + i][x] == 'w'
-						|| model.getPlansza()[y + i][x] == 'p')){
-					moznaDodawacPlusY = false;
-				}
-				if(y - i >= 0 && (model.getPlansza()[y  - i][x] == '.'
-						|| model.getPlansza()[y - i][x] == 'S'
-						|| model.getPlansza()[y - i][x] == 'G'
-						|| model.getPlansza()[y - i][x] == 'K'
-						|| model.getPlansza()[y - i][x] == 'H'
-						|| model.getPlansza()[y - i][x] == 'W'
-						|| model.getPlansza()[y - i][x] == 'P')){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y - i), RodzajFigury.WIEZA);
-					if(model.getPlansza()[y - i][x] == 'K'){
-						tmp.zbityKrol = true;
-					}
-					if(moznaDodawacMinusY){
-						res.add(tmp);
-					}
-				}
-				else if(y - i >= 0 && (model.getPlansza()[y - i][x] == 's'
-						|| model.getPlansza()[y - i][x] == 'g'
-						|| model.getPlansza()[y - i][x] == 'k'
-						|| model.getPlansza()[y - i][x] == 'h'
-						|| model.getPlansza()[y - i][x] == 'w'
-						|| model.getPlansza()[y - i][x] == 'p')){
-					moznaDodawacMinusY = false;
-				}
-			}
-			break;
-		}
-		/*System.out.println("----------------------------------------------");
-		System.out.println("ruchy wiezy mozliwe: " + res.size());
-		System.out.println("----------------------------------------------");*/
+		
 		return res;
 	}
 	
+	/*
+	 * Metoda zwracajaca mozliwe ruchy skoczka z pozycji okreslonej przez poczatkowyPunkt.
+	 */
 	private ArrayList<Ruch> getMozliweRuchySkoczka(Punkt poczatkowyPunkt, KolorFigury kolor){
 		ArrayList<Ruch> res = new ArrayList<Ruch>();
 		Ruch tmp;
@@ -754,34 +556,41 @@ public class Kontroler {
 		return res;
 	}
 	
+	/*
+	 * Metoda zwracajaca mozliwe ruchy gonca z pozycji okreslonej przez poczatkowyPunkt.
+	 */
 	private ArrayList<Ruch> getMozliweRuchyGonca(Punkt poczatkowyPunkt, KolorFigury kolor){
 		ArrayList<Ruch> res = new ArrayList<Ruch>();
 		Ruch tmp;
 		switch(kolor){
 		case BIALY:
-			ArrayList<Punkt> wspBiale = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> wspBiale = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);		// znajdz wspolrzedne punktow, do ktorych moze sie przemiescic na ukos
 			for(int i = 0; i < wspBiale.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, wspBiale.get(i), RodzajFigury.GONIEC);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj je do listy
 			}
 			break;
 		case CZARNY:
-			ArrayList<Punkt> wspCzarne = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> wspCzarne = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);	// znajdz wspolrzedne punktow, do ktorych moze sie przemiesic na ukos
 			for(int i = 0; i < wspCzarne.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, wspCzarne.get(i), RodzajFigury.GONIEC);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj je do listy
 			}
 			break;
 		}
 		return res;
 	}
-	
+
+	/*
+	 * Metoda zwracajaca mozliwe ruchy hetmana z pozycji okreslonej przez poczatkowyPunkt. "Sprawdza" punkty, do ktorych moze sie przemiescic na wprost, 
+	 * i na ukos, i jesli nie sa zajete przez wlasne bierki, to dodaje ten ruch do listy mozliwych ruchow.
+	 */
 	private ArrayList<Ruch> getMozliweRuchyHetmana(Punkt poczatkowyPunkt, KolorFigury kolor){
 		final int x = poczatkowyPunkt.getX();
 		final int y = poczatkowyPunkt.getY();
@@ -789,45 +598,49 @@ public class Kontroler {
 		Ruch tmp;
 		switch(kolor){
 		case BIALY:
-			ArrayList<Punkt> listaWspUkosBialy = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);
-			ArrayList<Punkt> listaWspProstoBialy = getMozliwePunktyProsto(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> listaWspUkosBialy = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);	// znajdz wspolrzedne punktow, do ktorych moze sie przemiescic na ukos
+			ArrayList<Punkt> listaWspProstoBialy = getMozliwePunktyProsto(poczatkowyPunkt, kolor);	// znajdz wspolrzedne punktow, do ktorych moze sie przemiescic na wprost
 			for(int i = 0; i < listaWspUkosBialy.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, listaWspUkosBialy.get(i), RodzajFigury.HETMAN);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj te punkty do listy
 			}
 			for(int i = 0; i < listaWspProstoBialy.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, listaWspProstoBialy.get(i), RodzajFigury.HETMAN);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj te punkty do listy
 			}
 			break;
 		case CZARNY:
-			ArrayList<Punkt> listaWspUkosCzarny = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor);
-			ArrayList<Punkt> listaWspProstoCzarny = getMozliwePunktyProsto(poczatkowyPunkt, kolor);
+			ArrayList<Punkt> listaWspUkosCzarny = getMozliwePunktyNaUkos(poczatkowyPunkt, kolor); 	// znajdz wspolrzedne punktow, do ktorych moze sie przemiescic na ukos
+			ArrayList<Punkt> listaWspProstoCzarny = getMozliwePunktyProsto(poczatkowyPunkt, kolor);	// znajdz wspolrzedne punktow, do ktorych moze sie przemiescic na wprost
 			for(int i = 0; i < listaWspUkosCzarny.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, listaWspUkosCzarny.get(i), RodzajFigury.HETMAN);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj te punkty do listy
 			}
 			for(int i = 0; i < listaWspProstoCzarny.size(); i++){
 				tmp = new Ruch(poczatkowyPunkt, listaWspProstoCzarny.get(i), RodzajFigury.HETMAN);
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
-				res.add(tmp);
+				res.add(tmp);	// dodaj te punkty do listy
 			}
 			break;
 		}
 		return res;
 	}
 	
+	/*
+	 * Metoda zwracajaca mozliwe ruchy krola z pozycji okreslonej przez poczatkowyPunkt. "Sprawdza" otoczenie krola - tzn. punkty,
+	 * do ktorych moze sie przemiescic krol, i jesli nie sa zajete przez wlasne bierki, to dodaje ten ruch do listy mozliwych ruchow.
+	 */
 	private ArrayList<Ruch> getMozliweRuchyKrola(Punkt poczatkowyPunkt, KolorFigury kolor){
 		ArrayList<Ruch> res = new ArrayList<Ruch>();
 		Ruch tmp;
@@ -932,6 +745,7 @@ public class Kontroler {
 	}
 	
 	/* 
+	 * Pomocnicza metoda do znajdywania mozliwych ruchow na ukos
 	 * @returns Liste mozliwych punktow ruchu na ukos 
 	 * */
 	private ArrayList<Punkt> getMozliwePunktyNaUkos(Punkt poczatkowyPunkt, KolorFigury kolor){
@@ -950,7 +764,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x + i] == 'H'
 							|| model.getPlansza()[y + i][x + i] == 'K'
 							|| model.getPlansza()[y + i][x + i] == 'P') {
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y + i][x + i] == 's'
 							|| model.getPlansza()[y + i][x + i] == 'w'
@@ -959,7 +773,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x + i] == 'k'
 							|| model.getPlansza()[y + i][x + i] == 'p') {
 						listaWsp.add(new Punkt(x + i, y + i));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
@@ -974,7 +788,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x - i] == 'H'
 							|| model.getPlansza()[y + i][x - i] == 'K'
 							|| model.getPlansza()[y + i][x - i] == 'P'){
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y + i][x - i] == 's'
 							|| model.getPlansza()[y + i][x - i] == 'w'
@@ -983,7 +797,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x - i] == 'k'
 							|| model.getPlansza()[y + i][x - i] == 'p') {
 						listaWsp.add(new Punkt(x - i, y + i));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
@@ -998,7 +812,7 @@ public class Kontroler {
 							|| model.getPlansza()[y - i][x + i] == 'H'
 							|| model.getPlansza()[y - i][x + i] == 'K'
 							|| model.getPlansza()[y - i][x + i] == 'P'){
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y - i][x + i] == 's'
 							|| model.getPlansza()[y - i][x + i] == 'w'
@@ -1007,7 +821,7 @@ public class Kontroler {
 							|| model.getPlansza()[y - i][x + i] == 'k'
 							|| model.getPlansza()[y - i][x + i] == 'p') {
 						listaWsp.add(new Punkt(x + i, y - i));
-						break;
+						break; // poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
@@ -1022,7 +836,7 @@ public class Kontroler {
 							|| model.getPlansza()[y - i][x - i] == 'H'
 							|| model.getPlansza()[y - i][x - i] == 'K'
 							|| model.getPlansza()[y - i][x - i] == 'P'){
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y - i][x - i] == 's'
 							|| model.getPlansza()[y - i][x - i] == 'w'
@@ -1031,12 +845,12 @@ public class Kontroler {
 							|| model.getPlansza()[y - i][x - i] == 'k'
 							|| model.getPlansza()[y - i][x - i] == 'p') {
 						listaWsp.add(new Punkt(x - i, y - i));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
 		}
-		else if(kolor == KolorFigury.CZARNY){
+		else if(kolor == KolorFigury.CZARNY){	// analogicznie jak dla bialych, z tym ze zmienia sie wielkosc liter
 			for (int i = 1; i < 8; i++) {
 				if (y + i < 8 && x + i < 8) {
 					if (model.getPlansza()[y + i][x + i] == '.') {
@@ -1137,6 +951,10 @@ public class Kontroler {
 		return listaWsp;
 	}
 	
+	/*
+	 * Pomocnicza metoda do znajdywania mozliwych ruchow na wprost.
+	 * @returns liste punktow, do ktorych mozna przejsc na wprost
+	 */
 	private ArrayList<Punkt> getMozliwePunktyProsto(Punkt poczatkowyPunkt, KolorFigury kolor){
 		final int x = poczatkowyPunkt.getX();
 		final int y = poczatkowyPunkt.getY();
@@ -1154,7 +972,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x] == 'H'
 							|| model.getPlansza()[y + i][x] == 'K'
 							|| model.getPlansza()[y + i][x] == 'P') {
-						break;
+						break; // poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y + i][x] == 's'
 							|| model.getPlansza()[y + i][x] == 'w'
@@ -1163,7 +981,7 @@ public class Kontroler {
 							|| model.getPlansza()[y + i][x] == 'k'
 							|| model.getPlansza()[y + i][x] == 'p') {
 						listaWsp.add(new Punkt(x, y + i));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
@@ -1175,13 +993,13 @@ public class Kontroler {
 					if (model.getPlansza()[y - i][x] == 'S' || model.getPlansza()[y - i][x] == 'W'
 							|| model.getPlansza()[y - i][x] == 'G' || model.getPlansza()[y - i][x] == 'H'
 							|| model.getPlansza()[y - i][x] == 'K' || model.getPlansza()[y - i][x] == 'P') {
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y - i][x] == 's' || model.getPlansza()[y - i][x] == 'w'
 							|| model.getPlansza()[y - i][x] == 'g' || model.getPlansza()[y - i][x] == 'h'
 							|| model.getPlansza()[y - i][x] == 'k' || model.getPlansza()[y - i][x] == 'p') {
 						listaWsp.add(new Punkt(x, y - i));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					} 
 				}
 			}
@@ -1196,7 +1014,7 @@ public class Kontroler {
 							|| model.getPlansza()[y][x + i] == 'H'
 							|| model.getPlansza()[y][x + i] == 'K'
 							|| model.getPlansza()[y][x + i] == 'P') {
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y][x + i] == 's'
 							|| model.getPlansza()[y][x + i] == 'w'
@@ -1205,7 +1023,7 @@ public class Kontroler {
 							|| model.getPlansza()[y][x + i] == 'k'
 							|| model.getPlansza()[y][x + i] == 'p') {
 						listaWsp.add(new Punkt(x + i, y));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
@@ -1220,7 +1038,7 @@ public class Kontroler {
 							|| model.getPlansza()[y][x - i] == 'H'
 							|| model.getPlansza()[y][x - i] == 'K'
 							|| model.getPlansza()[y][x - i] == 'P') {
-						break;
+						break;	// poniewaz znaleziono wlasne bierki
 					}
 					if (model.getPlansza()[y][x - i] == 's'
 							|| model.getPlansza()[y][x - i] == 'w'
@@ -1229,12 +1047,12 @@ public class Kontroler {
 							|| model.getPlansza()[y][x - i] == 'k'
 							|| model.getPlansza()[y][x - i] == 'p') {
 						listaWsp.add(new Punkt(x - i, y));
-						break;
+						break;	// poniewaz znaleziono bicie (a nie ma bicia w przelocie - w tym kierunku bierka nie moze juz dalej sie poruszac
 					}
 				}
 			}
-			break;
-		case CZARNY:
+			break;	
+		case CZARNY:	// analogicznie jak dla bialych bierek, zmienia sie tylko wielkosc liter
 			for(int i = 1; i < 8; i++){
 				if(y + i < 8){
 					if(model.getPlansza()[y + i][x] == '.'){
@@ -1330,6 +1148,9 @@ public class Kontroler {
 		return listaWsp;
 	}
 	
+	/*
+	 * Pomocnicza metoda do usuwania z listy figur figury o zadanych wspolrzednych x i y
+	 */
 	private void usunZbitaFigureZListy(ArrayList<Figura> lista, int x, int y){
 		int index = -1;
 		for(int i = 0; i < lista.size(); i++){
@@ -1343,6 +1164,9 @@ public class Kontroler {
 		}
 	}
 	
+	/*
+	 * Pomocnicza metoda do konwersji indeksu w postaci liczby na odpowiednia litere
+	 */
 	private char getCharFromInt(int index){
 		if(index == 0){
 			return 'A';
@@ -1371,6 +1195,9 @@ public class Kontroler {
 		else return '-';
 	}
 	
+	/*
+	 * Pomocnicza metoda do konwersji figury z typu wyliczeniowego RodzajFigury na jej odpowiednik np. PIONEK = 'P'
+	 */
 	private char getCharFromRodzajFiguryAndKolorFigury(RodzajFigury f, KolorFigury c){
 		switch(c){
 		case BIALY:
