@@ -2,6 +2,7 @@ package kontroler;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 import model.Figura;
 import model.KolorFigury;
@@ -31,33 +32,57 @@ public class Kontroler {
 		int liczbaRuchow = 0;
 		int tmp;
 		boolean zbityKrol = false;
+		boolean bialeDrapiezne = false;
+		boolean czarneDrapiezne = false;
+		
+		// ustaw zmienne bialeDrapiezne i czarneDrapiezne, odpowiadajace za to, czy gracz jest "drapiezny", czy tez nie
+		ArrayList<Integer> drapiezni = znajdzDrapieznychGraczy();
+		if(drapiezni.size() > 0){
+			if(drapiezni.get(0) == 1){
+				bialeDrapiezne = true;
+			}
+			else if(drapiezni.get(0) == 2){
+				czarneDrapiezne = true;
+			}
+			
+			if(drapiezni.size() > 1){
+				if(drapiezni.get(1) == 1){
+					bialeDrapiezne = true;
+				}
+				else if(drapiezni.get(1) == 2){
+					czarneDrapiezne = true;
+				}
+			}
+		}
+		
 		widok.rysujPowitanie();
 		widok.rysujPlansze();
 		
+		// rozpocznij symulacje
 		while(true){
 			tmp = liczbaRuchow;
 			tmp++;
 			
+			// wyswietl komunikat o numerze tury:
 			System.out.println();
 			System.out.println("   Tura " + tmp);
 			System.out.println();
 			
-			//System.out.println("Ruch z ... ");
-			
 			/* biale wykonuja ruch: */
-			if(!bialeWykonajRuch(zbityKrol)){
+			if(!bialeWykonajRuch(zbityKrol, bialeDrapiezne)){
 				break;
 			}
 			widok.rysujPlansze();
 			System.out.println();
 			
 			/* czarne wykonuja ruch: */
-			if(!czarneWykonajRuch(zbityKrol)){
+			if(!czarneWykonajRuch(zbityKrol, czarneDrapiezne)){
 				break;
 			}
 			widok.rysujPlansze();
 			System.out.println();
 			
+			// skonczyly sie ruchy, remis
 			if(liczbaRuchow == 49){
 				System.out.println("\t REMIS");
 				break;
@@ -67,10 +92,29 @@ public class Kontroler {
 	}
 	
 	/*
+	 * Pomocnicza metoda zwracajaca liste nr graczy, ktorzy maja byc "drapiezni"
+	 */
+	private ArrayList<Integer> znajdzDrapieznychGraczy(){
+		ArrayList<Integer> res = new ArrayList<Integer>();
+		System.out.println("Podaj, czy ktorys z graczy ma byc \"drapiezny\" (mozliwe wybory: 1, 1:2, 2, ZADEN)");
+		Scanner sc = new Scanner(System.in);
+		String s = sc.nextLine();
+		if(s.equals("ZADEN")){
+			return res;
+		}
+		String[] tab = s.split(":");
+		res.add(Integer.valueOf(tab[0]));
+		if(tab.length > 1){
+			res.add(Integer.valueOf(tab[1]));
+		}
+		return res;
+	}
+	
+	/*
 	 * Metoda sluzaca do wykonania ruchu przez biale bierki
 	 * @returns false, gdy nie ma mozliwych ruchow do wykonania, lub zostal zbity krol przeciwnika. True w przeciwnym przypadku
 	 */
-	private boolean bialeWykonajRuch(boolean zbityKrol){
+	private boolean bialeWykonajRuch(boolean zbityKrol, boolean drapiezny){
 		Random r = new Random();
 		int index;
 		Ruch doWykonania;
@@ -148,7 +192,7 @@ public class Kontroler {
 	/*
 	 * Analogiczna metoda jak dla bialych bierek - sluzy do wykonania ruchu przez czarne bierki
 	 */
-	private boolean czarneWykonajRuch(boolean zbityKrol){
+	private boolean czarneWykonajRuch(boolean zbityKrol, boolean drapiezny){
 		Random r = new Random();
 		int index;
 		Ruch doWykonania;
@@ -245,6 +289,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x + 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y + 1)));
 				res.add(tmp);
 			} 
 			if (y + 1 != 8 && x - 1 != -1 && model.getPlansza()[y + 1][x - 1] != '.' 
@@ -258,6 +303,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x - 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y + 1)));
 				res.add(tmp);
 			}
 		}
@@ -276,6 +322,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x + 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y + 1)));
 				res.add(tmp);
 			} 
 			if (y - 1 != -1 && x - 1 != -1 && model.getPlansza()[y - 1][x - 1] != '.' 
@@ -289,6 +336,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x - 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y - 1)));
 				res.add(tmp);
 			}
 		}
@@ -311,6 +359,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);		// dodaj je do listy ruchow
 			}
 			break;
@@ -321,6 +370,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);		// dodaj je do listy ruchow
 			}
 			break;
@@ -351,6 +401,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x + 2] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 2, y + 1)));
 				res.add(tmp);
 			}
 			if(x + 2 <= 7 && y - 1 >= 0 && (model.getPlansza()[y - 1][x + 2] == 'w'
@@ -364,6 +415,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x + 2] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 2, y - 1)));
 				res.add(tmp);
 			}
 			if(x + 1 <= 7 && y + 2 <= 7 && (model.getPlansza()[y + 2][x + 1] == 'w'
@@ -377,6 +429,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 2][x + 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y + 2)));
 				res.add(tmp);
 			}
 			if(x - 1 >= 0 && y + 2 <= 7 && (model.getPlansza()[y + 2][x - 1] == 'w'
@@ -390,6 +443,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 2][x - 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y + 2)));
 				res.add(tmp);
 			}
 			if(x - 2 >= 0 && y + 1 <= 7 && (model.getPlansza()[y + 1][x - 2] == 'w'
@@ -403,6 +457,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x - 2] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 2, y + 1)));
 				res.add(tmp);
 			}
 			if(x - 1 >= 0 && y - 2 >= 0 && (model.getPlansza()[y - 2][x - 1] == 'w'
@@ -416,6 +471,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 2][x - 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y - 2)));
 				res.add(tmp);
 			}
 			if(x - 2 >= 0 && y - 1 >= 0 && (model.getPlansza()[y - 1][x - 2] == 'w'
@@ -429,6 +485,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x - 2] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 2, y - 1)));
 				res.add(tmp);
 			}
 			if(x + 1 <= 7 && y - 2 >= 0 && (model.getPlansza()[y - 2][x + 1] == 'w'
@@ -442,6 +499,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 2][x + 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y - 2)));
 				res.add(tmp);
 			}
 			break;
@@ -457,6 +515,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x + 2] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 2, y + 1)));
 				res.add(tmp);
 			}
 			if(x + 2 <= 7 && y - 1 >= 0 && (model.getPlansza()[y - 1][x + 2] == 'W'
@@ -470,6 +529,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x + 2] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 2, y - 1)));
 				res.add(tmp);
 			}
 			if(x + 1 <= 7 && y + 2 <= 7 && (model.getPlansza()[y + 2][x + 1] == 'W'
@@ -483,6 +543,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 2][x + 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y + 2)));
 				res.add(tmp);
 			}
 			if(x - 1 >= 0 && y + 2 <= 7 && (model.getPlansza()[y + 2][x - 1] == 'W'
@@ -496,6 +557,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 2][x - 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y + 2)));
 				res.add(tmp);
 			}
 			if(x - 2 >= 0 && y + 1 <= 7 && (model.getPlansza()[y + 1][x - 2] == 'W'
@@ -509,6 +571,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x - 2] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 2, y + 1)));
 				res.add(tmp);
 			}
 			if(x - 1 >= 0 && y - 2 >= 0 && (model.getPlansza()[y - 2][x - 1] == 'W'
@@ -522,6 +585,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 2][x - 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y - 2)));
 				res.add(tmp);
 			}
 			if(x - 2 >= 0 && y - 1 >= 0 && (model.getPlansza()[y - 1][x - 2] == 'W'
@@ -535,6 +599,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x - 2] == 'K'){
 					tmp.zbityKrol = true;
 				}	
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 2, y - 1)));
 				res.add(tmp);
 			}
 			if(x + 1 <= 7 && y - 2 >= 0 && (model.getPlansza()[y - 2][x + 1] == 'W'
@@ -548,6 +613,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 2][x + 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y - 2)));
 				res.add(tmp);
 			}
 			break;
@@ -570,6 +636,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj je do listy
 			}
 			break;
@@ -580,6 +647,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj je do listy
 			}
 			break;
@@ -605,6 +673,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj te punkty do listy
 			}
 			for(int i = 0; i < listaWspProstoBialy.size(); i++){
@@ -612,6 +681,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj te punkty do listy
 			}
 			break;
@@ -623,6 +693,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj te punkty do listy
 			}
 			for(int i = 0; i < listaWspProstoCzarny.size(); i++){
@@ -630,6 +701,7 @@ public class Kontroler {
 				if(model.getPlansza()[tmp.getDocelowy().getY()][tmp.getDocelowy().getX()] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(tmp.getDocelowy().getX(), tmp.getDocelowy().getY())));
 				res.add(tmp);	// dodaj te punkty do listy
 			}
 			break;
@@ -657,6 +729,7 @@ public class Kontroler {
 				if(model.getPlansza()[y][x - 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y)));
 				res.add(tmp);
 			}
 			if(x + 1 != 8 && model.getPlansza()[y][x + 1] != 'W'
@@ -668,6 +741,7 @@ public class Kontroler {
 				if(model.getPlansza()[y][x + 1] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y)));
 				res.add(tmp);
 			}
 			if(y - 1 != -1 && model.getPlansza()[y - 1][x] != 'W'
@@ -679,6 +753,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x] == 'k'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x, y - 1)));
 				res.add(tmp);
 			}
 			if(y + 1 != 8 && model.getPlansza()[y + 1][x] != 'W'
@@ -686,11 +761,12 @@ public class Kontroler {
 					&& model.getPlansza()[y + 1][x] != 'S'
 					&& model.getPlansza()[y + 1][x] != 'G'
 					&& model.getPlansza()[y + 1][x] != 'H'){
-					tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y + 1), RodzajFigury.KROL);
-					if(model.getPlansza()[y + 1][x] == 'k'){
-						tmp.zbityKrol = true;
-					}
-					res.add(tmp);
+				tmp = new Ruch(poczatkowyPunkt, new Punkt(x, y + 1), RodzajFigury.KROL);
+				if(model.getPlansza()[y + 1][x] == 'k'){
+					tmp.zbityKrol = true;
+				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x, y + 1)));
+				res.add(tmp);
 			}
 			break;
 		case CZARNY:
@@ -703,6 +779,7 @@ public class Kontroler {
 				if(model.getPlansza()[y][x - 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x - 1, y)));
 				res.add(tmp);
 			}
 			if(x + 1 != 8 && model.getPlansza()[y][x + 1] != 'w'
@@ -714,6 +791,7 @@ public class Kontroler {
 				if(model.getPlansza()[y][x + 1] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x + 1, y)));
 				res.add(tmp);
 			}
 			if(y - 1 != -1 && model.getPlansza()[y - 1][x] != 'w'
@@ -725,6 +803,7 @@ public class Kontroler {
 				if(model.getPlansza()[y - 1][x] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x, y - 1)));
 				res.add(tmp);
 			}
 			if(y + 1 != 8 && model.getPlansza()[y + 1][x] != 'w'
@@ -736,6 +815,7 @@ public class Kontroler {
 				if(model.getPlansza()[y + 1][x] == 'K'){
 					tmp.zbityKrol = true;
 				}
+				tmp.setZbitaFigura(getNazweZbitejFigury(new Punkt(x, y + 1)));
 				res.add(tmp);
 			}
 			break;
@@ -1146,6 +1226,35 @@ public class Kontroler {
 			break;
 		}
 		return listaWsp;
+	}
+	
+	/*
+	 * Pomocnicza metoda zwracajaca rodzaj figury pod zadanymi wspolrzednymi
+	 */
+	private RodzajFigury getNazweZbitejFigury(Punkt wsp){
+		final int x = wsp.getX();
+		final int y = wsp.getY();
+		if(model.getPlansza()[y][x] == 'k' || model.getPlansza()[y][x] == 'K'){
+			return RodzajFigury.KROL;
+		}
+		else if(model.getPlansza()[y][x] == 's' || model.getPlansza()[y][x] == 'S'){
+			return RodzajFigury.SKOCZEK;
+		}
+		else if(model.getPlansza()[y][x] == 'h' || model.getPlansza()[y][x] == 'H'){
+			return RodzajFigury.HETMAN;
+		}
+		else if(model.getPlansza()[y][x] == 'w' || model.getPlansza()[y][x] == 'W'){
+			return RodzajFigury.WIEZA;
+		}
+		else if(model.getPlansza()[y][x] == 'p' || model.getPlansza()[y][x] == 'P'){
+			return RodzajFigury.PIONEK;
+		}
+		else if(model.getPlansza()[y][x] == 'g' || model.getPlansza()[y][x] == 'G'){
+			return RodzajFigury.GONIEC;
+		}
+		else {	// nigdy nie nastapi
+			return RodzajFigury.PIONEK;
+		}
 	}
 	
 	/*

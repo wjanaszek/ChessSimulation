@@ -12,6 +12,7 @@ public class Ruch {
 	private Punkt docelowy;
 	public boolean zbityKrol = false;
 	private RodzajFigury figura;
+	private RodzajFigury zbitaFigura;	// rodzaj zbitej figury
 	
 	public Ruch(Punkt poczatkowy, Punkt docelowy, RodzajFigury figura){
 		this.poczatkowy = poczatkowy;
@@ -29,5 +30,13 @@ public class Ruch {
 	
 	public RodzajFigury getFigure(){
 		return figura;
+	}
+	
+	public RodzajFigury getZbitaFigura(){
+		return zbitaFigura;
+	}
+	
+	public void setZbitaFigura(RodzajFigury f){
+		this.zbitaFigura = f;
 	}
 }
